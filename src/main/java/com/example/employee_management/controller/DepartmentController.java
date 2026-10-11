@@ -1,7 +1,10 @@
+
 package com.example.employee_management.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,45 +14,79 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.employee_management.entity.Department;
+import jakarta.validation.Valid;
+
+import com.example.employee_management.dto.DepartmentRequest;
+import com.example.employee_management.dto.DepartmentResponse;
+import com.example.employee_management.dto.EmployeeResponse;
 import com.example.employee_management.service.DepartmentService;
 
 @RestController
 @RequestMapping("/departments")
 public class DepartmentController {
+
     private final DepartmentService departmentService;
 
-    DepartmentController(DepartmentService departmentService) {
+    public DepartmentController(DepartmentService departmentService) {
         this.departmentService = departmentService;
     }
 
     @GetMapping("/{id}")
-    public Department getDepartmentById(@PathVariable Long id) {
-        return departmentService.getDepartmentByID(id);
+    public ResponseEntity<DepartmentResponse> getDepartmentById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                departmentService.getDepartmentByID(id));
     }
 
     @GetMapping("/search/{name}")
-    public List<Department> searchDepartmentsByName(@PathVariable String name) {
-        return departmentService.getDepartmentsByName(name);
+    public ResponseEntity<List<DepartmentResponse>> searchDepartmentsByName(
+            @PathVariable String name) {
+
+        return ResponseEntity.ok(
+                departmentService.getDepartmentsByName(name));
     }
 
     @PostMapping
-    public Department createDepartment(@RequestBody Department department) {
-        return departmentService.createDepartment(department);
+    public ResponseEntity<DepartmentResponse> createDepartment(
+            @Valid @RequestBody DepartmentRequest department) {
+
+        DepartmentResponse savedDepartment = departmentService.createDepartment(department);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(savedDepartment);
     }
 
     @PutMapping("/{id}")
-    public void updateDepartment(@PathVariable Long id, @RequestBody Department updatedDepartment) {
-        departmentService.updateDepartment(id, updatedDepartment);
+    public ResponseEntity<DepartmentResponse> updateDepartment(
+            @PathVariable Long id,
+            @Valid @RequestBody DepartmentRequest updatedDepartment) {
+
+        DepartmentResponse department = departmentService.updateDepartment(id, updatedDepartment);
+
+        return ResponseEntity.ok(department);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDepartmentById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDepartmentById(
+            @PathVariable Long id) {
+
         departmentService.deleteDepartmentById(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public List<Department> getDepartments() {
-        return departmentService.getAllDepartments();
+    public ResponseEntity<List<DepartmentResponse>> getDepartments() {
+        return ResponseEntity.ok(
+                departmentService.getAllDepartments());
+    }
+
+    @GetMapping("/{departmentId}/employees")
+    public ResponseEntity<List<EmployeeResponse>> getEmployeesByDepartment(
+            @PathVariable Long departmentId) {
+
+        return ResponseEntity.ok(
+            departmentService.getEmployeesByDepartment(departmentId));
     }
 }

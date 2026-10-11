@@ -8,4 +8,5 @@ import com.example.employee_management.entity.Employee;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByNameContainingIgnoreCase(String name);
+    List<Employee> findByDepartmentId(Long departmentID);
 }

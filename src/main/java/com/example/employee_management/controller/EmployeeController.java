@@ -11,8 +11,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.employee_management.entity.Employee;
+import com.example.employee_management.dto.EmployeeRequest;
+import com.example.employee_management.dto.EmployeeResponse;
 import com.example.employee_management.service.EmployeeService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import jakarta.validation.Valid;
 
 @RequestMapping("/employees")
 @RestController
@@ -24,32 +30,47 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<EmployeeResponse> getAllEmployees() {
+        List<EmployeeResponse> employeeResponses = employeeService.getAllEmployees();
+        return ResponseEntity.ok(employeeResponses).getBody();
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id);
+    public EmployeeResponse getEmployeeById(@PathVariable Long id) {
+        EmployeeResponse employeeResponse = employeeService.getEmployeeById(id);
+        return ResponseEntity.ok(employeeResponse).getBody();
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEmployeeById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEmployeeById(@PathVariable Long id) {
         employeeService.deleteEmployeeById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping
-    public Employee createEmployee(@RequestBody Employee employee) {
-        return employeeService.createEmployee(employee);
+    public EmployeeResponse createEmployee(@Valid @RequestBody EmployeeRequest request) {
+        EmployeeResponse employeeResponse = employeeService.createEmployee(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeResponse).getBody();
     }
 
     @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable Long id, @RequestBody Employee updatedEmployee) {
-        return employeeService.updateEmployee(id, updatedEmployee);
+    public EmployeeResponse updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeRequest updatedRequest) {
+        EmployeeResponse employeeResponse = employeeService.updateEmployee(id, updatedRequest);
+        return ResponseEntity.ok(employeeResponse).getBody();
     }
 
     @GetMapping("/search/{name}")
-    public List<Employee> searchEmployeesByName(@PathVariable String name) {
+    public List<EmployeeResponse> searchEmployeesByName(@PathVariable String name) {
         return employeeService.searchEmployeesByName(name);
+    }
+
+    @GetMapping("/department/{departmentId}")
+    public ResponseEntity<List<EmployeeResponse>> getEmployeesByDepartment(
+            @PathVariable Long departmentId) {
+
+        List<EmployeeResponse> employees =
+                employeeService.getEmployeesByDepartment(departmentId);
+
+        return ResponseEntity.ok(employees);
     }
 }
